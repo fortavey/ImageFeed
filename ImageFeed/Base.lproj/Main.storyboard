@@ -58,9 +58,10 @@
                                                             </constraints>
                                                         </view>
                                                         <button opaque="NO" alpha="0.5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="m9s-xb-mkW">
-                                                            <rect key="frame" x="310.33333333333331" y="0.0" width="50.666666666666686" height="44"/>
+                                                            <rect key="frame" x="317" y="0.0" width="44" height="44"/>
                                                             <constraints>
-                                                                <constraint firstAttribute="height" constant="44" id="RjN-hd-lqZ"/>
+                                                                <constraint firstAttribute="height" constant="44" id="WhK-sm-jfM"/>
+                                                                <constraint firstAttribute="width" constant="44" id="xpp-0C-lZa"/>
                                                             </constraints>
                                                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <state key="normal" title="Button"/>
@@ -76,9 +77,9 @@
                                                         <constraint firstAttribute="bottom" secondItem="SL4-vg-m7q" secondAttribute="bottom" id="8ax-np-u4G"/>
                                                         <constraint firstItem="m9s-xb-mkW" firstAttribute="top" secondItem="YvO-Tr-HoT" secondAttribute="top" id="Adu-Ni-gp9"/>
                                                         <constraint firstItem="gGJ-Uh-eew" firstAttribute="leading" secondItem="YvO-Tr-HoT" secondAttribute="leading" id="LCf-MR-1ZE"/>
+                                                        <constraint firstItem="m9s-xb-mkW" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="YvO-Tr-HoT" secondAttribute="leading" constant="20" symbolic="YES" id="fT9-uX-Xlp"/>
                                                         <constraint firstItem="gGJ-Uh-eew" firstAttribute="top" secondItem="YvO-Tr-HoT" secondAttribute="top" id="nSx-zC-Zl5"/>
                                                         <constraint firstAttribute="trailing" secondItem="SL4-vg-m7q" secondAttribute="trailing" id="v2I-xE-MNf"/>
-                                                        <constraint firstItem="m9s-xb-mkW" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="YvO-Tr-HoT" secondAttribute="leading" constant="20" symbolic="YES" id="v6Q-qK-x67"/>
                                                         <constraint firstAttribute="trailing" secondItem="m9s-xb-mkW" secondAttribute="trailing" id="yhF-cE-ASE"/>
                                                     </constraints>
                                                 </view>
