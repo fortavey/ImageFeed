@@ -8,11 +8,11 @@
 import UIKit
 
 final class ProfileViewController: UIViewController {
-    var profileImageView: UIImageView = UIImageView()
-    var logOutButtonView: UIButton = UIButton()
-    var fioLabelView: UILabel = UILabel()
-    var nicknameLabelView: UILabel = UILabel()
-    var descriptionLabelView: UILabel = UILabel()
+    private var profileImageView: UIImageView = UIImageView()
+    private var logOutButtonView: UIButton = UIButton()
+    private var fioLabelView: UILabel = UILabel()
+    private var nicknameLabelView: UILabel = UILabel()
+    private var descriptionLabelView: UILabel = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
