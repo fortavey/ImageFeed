@@ -13,9 +13,11 @@ struct NetworkClient {
         case codeError
     }
     
-    func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
+    var task: URLSessionDataTask?
+    
+    mutating func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 handler(.failure(error))
                 return
@@ -34,6 +36,8 @@ struct NetworkClient {
             handler(.success(data))
         }
         
-        task.resume()
+        if let task {
+            task.resume()
+        }
     }
 }

@@ -7,6 +7,10 @@
 
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 struct OAuthTokenResponseBody: Decodable {
     var access_token: String
 }
@@ -15,7 +19,9 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() {}
     
-    let networkClient = NetworkClient()
+    var lastCode: String?
+    
+    var networkClient = NetworkClient()
     
     func makeOAuthTokenRequest(code: String) -> URLRequest? {
         
@@ -39,6 +45,24 @@ final class OAuth2Service {
      }
     
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        
+        assert(Thread.isMainThread)
+        if networkClient.task != nil {                                    // 5
+            if lastCode != code {                           // 6
+                networkClient.task?.cancel()                              // 7
+            } else {
+                completion(.failure(AuthServiceError.invalidRequest))
+                return                                      // 8
+            }
+        } else {
+            if lastCode == code {                           // 9
+                completion(.failure(AuthServiceError.invalidRequest))
+                return
+            }
+        }
+        
+        lastCode = code
+        
         let request = makeOAuthTokenRequest(code: code)
         
         guard let request else {
