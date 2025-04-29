@@ -11,12 +11,12 @@ protocol AuthViewControllerDelegate: AnyObject {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String)
 }
 
-class AuthViewController: UIViewController {
+final class AuthViewController: UIViewController {
     private let showWebViewSegueIdentifier = "ShowWebView"
     
     weak var delegate: AuthViewControllerDelegate?
     
-    @IBOutlet var loginButtonView: UIButton!
+    @IBOutlet weak var loginButtonView: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -17,18 +17,18 @@ enum WebViewConstants {
     static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 }
 
-class WebViewViewController: UIViewController {
-    @IBOutlet var webView: WKWebView!
+final class WebViewViewController: UIViewController {
+    @IBOutlet weak var webView: WKWebView!
     @IBOutlet private var progressView: UIProgressView!
     weak var delegate: WebViewViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
-        loadAuthView()
+        loadAuthorizationPage()
     }
     
-    private func loadAuthView() {
+    private func loadAuthorizationPage() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
             return
         }

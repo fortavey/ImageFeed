@@ -7,13 +7,17 @@
 
 import Foundation
 
-class OAuth2TokenStorage {
+private enum Keys {
+    static let accessToken = "access_token"
+}
+
+final class OAuth2TokenStorage {
     var token: String? {
         get {
-            return UserDefaults.standard.string(forKey: "access_token")
+            return UserDefaults.standard.string(forKey: Keys.accessToken)
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: "access_token")
+            UserDefaults.standard.set(newValue, forKey: Keys.accessToken)
         }
     }
 }

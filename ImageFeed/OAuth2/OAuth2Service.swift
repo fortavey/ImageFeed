@@ -11,12 +11,17 @@ struct OAuthTokenResponseBody: Decodable {
     var access_token: String
 }
 
-class OAuth2Service {
+final class OAuth2Service {
+    static let shared = OAuth2Service()
+    private init() {}
+    
     let networkClient = NetworkClient()
     
-    func makeOAuthTokenRequest(code: String) -> URLRequest {
+    func makeOAuthTokenRequest(code: String) -> URLRequest? {
         
-        var urlComponents = URLComponents(string: "https://unsplash.com/oauth/token")!
+        guard var urlComponents = URLComponents(string: "https://unsplash.com/oauth/token") else {
+            fatalError("Invalid OAuth token URL")
+        }
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
             URLQueryItem(name: "client_secret", value: Constants.secretKey),
@@ -30,11 +35,15 @@ class OAuth2Service {
             request.httpMethod = "POST"
             return request
         }
-        return URLRequest(url: URL(string: "")!)
+        return nil
      }
     
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         let request = makeOAuthTokenRequest(code: code)
+        
+        guard let request else {
+            fatalError("Invalid OAuth token request")
+        }
         
         networkClient.fetch(request: request) { result in
             switch result {
