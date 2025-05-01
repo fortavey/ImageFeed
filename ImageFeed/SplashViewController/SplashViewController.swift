@@ -12,7 +12,7 @@ final class SplashViewController: UIViewController {
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
 
     private let oauth2TokenStorage = OAuth2TokenStorage()
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
@@ -63,10 +63,10 @@ extension SplashViewController: AuthViewControllerDelegate {
     }
 
     private func fetchOAuthToken(_ code: String) {
-        ProgressHUD.animate()
+        UIBlockingProgressHUD.show()
         OAuth2Service.shared.fetchOAuthToken(code: code) { [weak self] result in
             guard let self else { return }
-            ProgressHUD.dismiss()
+            UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(let token):
                 oauth2TokenStorage.token = token
