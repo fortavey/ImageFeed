@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private var profileImageView: UIImageView = UIImageView()
@@ -14,13 +15,32 @@ final class ProfileViewController: UIViewController {
     private var nicknameLabelView: UILabel = UILabel()
     private var descriptionLabelView: UILabel = UILabel()
     
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
+    private var oAuth2TokenStorage = OAuth2TokenStorage()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        profileImageServiceObserver = NotificationCenter.default    // 2
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification, // 3
+                object: nil,                                        // 4
+                queue: .main                                        // 5
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()                                 // 6
+            }
+        updateAvatar()
+       
+        if let profile = ProfileService.shared.profile {
+            updateProfileDetails(profile: profile)
+        }
+        
         renderProfileImage()
         renderLogOutButtonView()
         renderLabelViews(
             currentLabelView: fioLabelView,
-            labelText: "Екатерина Новикова",
             topOffsetView: profileImageView,
             fontColor: .white,
             fontSize: 23,
@@ -28,18 +48,33 @@ final class ProfileViewController: UIViewController {
         )
         renderLabelViews(
             currentLabelView: nicknameLabelView,
-            labelText: "@ekaterina_nov",
             topOffsetView: fioLabelView,
             fontColor: .ypGrey,
             fontSize: 13
         )
         renderLabelViews(
             currentLabelView: descriptionLabelView,
-            labelText: "Hello, world!",
             topOffsetView: nicknameLabelView,
             fontColor: .white,
             fontSize: 13
         )
+    }
+    
+    private func updateAvatar() {
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        let processor = RoundCornerImageProcessor(cornerRadius: 20)
+        profileImageView.kf.setImage(with: url,
+                              placeholder: UIImage(named: "Photo"),
+                              options: [.processor(processor)])
+    }
+    
+    private func updateProfileDetails(profile: Profile) {
+        self.fioLabelView.text = profile.name
+        self.nicknameLabelView.text = profile.loginName
+        self.descriptionLabelView.text = profile.bio
     }
 
     private func renderProfileImage() {
@@ -68,8 +103,7 @@ final class ProfileViewController: UIViewController {
         logOutButtonView.heightAnchor.constraint(equalToConstant: 44).isActive = true
     }
     
-    private func renderLabelViews(currentLabelView: UILabel, labelText: String, topOffsetView: UIView, fontColor: UIColor, fontSize: CGFloat, fontWeight: UIFont.Weight = .regular){
-        currentLabelView.text = labelText
+    private func renderLabelViews(currentLabelView: UILabel, topOffsetView: UIView, fontColor: UIColor, fontSize: CGFloat, fontWeight: UIFont.Weight = .regular){
         currentLabelView.font = UIFont.systemFont(ofSize: fontSize, weight: fontWeight)
         currentLabelView.textColor = fontColor
         view.addSubview(currentLabelView)

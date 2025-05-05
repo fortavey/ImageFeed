@@ -69,16 +69,10 @@ final class OAuth2Service {
             fatalError("Invalid OAuth token request")
         }
         
-        networkClient.fetch(request: request) { result in
+        networkClient.objectTask(for: request) { (result: Result<OAuthTokenResponseBody, Error>) in
             switch result {
             case .success(let data):
-                do {
-                    let decoder = JSONDecoder()
-                    let response = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    completion(.success(response.access_token))
-                } catch {
-                    completion(.failure(error))
-                }
+                completion(.success(data.access_token))
             case .failure(let error):
                 completion(.failure(error))
             }
