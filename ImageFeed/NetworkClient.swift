@@ -13,9 +13,11 @@ struct NetworkClient {
         case codeError
     }
     
-    func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
+    var task: URLSessionDataTask?
+    
+    mutating func fetch(request: URLRequest, handler: @escaping (Result<Data, Error>) -> Void) {
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 handler(.failure(error))
                 return
@@ -34,6 +36,30 @@ struct NetworkClient {
             handler(.success(data))
         }
         
-        task.resume()
+        if let task {
+            task.resume()
+        }
+    }
+    
+    mutating func objectTask<T: Decodable>(
+        for request: URLRequest,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        fetch(request: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let decoder = JSONDecoder()
+                    let response = try decoder.decode(T.self, from: data)
+                    completion(.success(response))
+                } catch {
+                    print("[NetworkClient]", "Ошибка декодирования: \(error.localizedDescription), Данные: \(String(data: data, encoding: .utf8) ?? "")")
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                print("[NetworkClient]", "Ошибка сетевого запроса: \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }
     }
 }

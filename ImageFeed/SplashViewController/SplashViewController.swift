@@ -6,19 +6,32 @@
 //
 
 import UIKit
+import ProgressHUD
 
 final class SplashViewController: UIViewController {
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
-
-    private let oauth2TokenStorage = OAuth2TokenStorage()
-
+        
+    private var logoImageView: UIImageView?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .ypBlack
+        
+        logoImageRender()
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        if let token = oauth2TokenStorage.token {
-            switchToTabBarController()
+        if let token = OAuth2TokenStorage.shared.token {
+            fetchProfile(token)
         } else {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            let storyboard = UIStoryboard(name: "Main", bundle: .main)
+            let viewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController
+            guard let authViewController = viewController else { return }
+            authViewController.delegate = self
+            authViewController.modalPresentationStyle = .fullScreen
+            self.present(authViewController, animated: true)
         }
     }
 
@@ -36,6 +49,21 @@ final class SplashViewController: UIViewController {
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
             .instantiateViewController(withIdentifier: "TabBarViewController")
         window.rootViewController = tabBarController
+    }
+    
+    private func logoImageRender() {
+        let logoImage = UIImage(named: "splash_screen_logo")
+        logoImageView = UIImageView(image: logoImage)
+        guard let logoImageView else { return }
+        logoImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(logoImageView)
+        NSLayoutConstraint.activate([
+            logoImageView.heightAnchor.constraint(equalToConstant: 78),
+            logoImageView.widthAnchor.constraint(equalToConstant: 75),
+            logoImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            logoImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        ])
     }
 }
 
@@ -55,24 +83,58 @@ extension SplashViewController {
 
 extension SplashViewController: AuthViewControllerDelegate {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        dismiss(animated: true) { [weak self] in
-            guard let self = self else { return }
-            self.fetchOAuthToken(code)
-        }
+        self.fetchOAuthToken(code, vc: vc)
     }
 
-    private func fetchOAuthToken(_ code: String) {
+    private func fetchOAuthToken(_ code: String, vc: AuthViewController) {
+        UIBlockingProgressHUD.show()
         OAuth2Service.shared.fetchOAuthToken(code: code) { [weak self] result in
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+            }
             guard let self else { return }
             switch result {
             case .success(let token):
-                oauth2TokenStorage.token = token
+                OAuth2TokenStorage.shared.token = token
                 DispatchQueue.main.async {
+                    OAuth2Service.shared.networkClient.task = nil
+                    OAuth2Service.shared.lastCode = nil
+                    self.fetchProfile(token)
+                    vc.dismiss(animated: true)
+                }
+            case .failure(let error):
+                let alert = UIAlertController(title: "Что-то пошло не так",
+                                              message: "Не удалось войти в систему",
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ок", style: .default))
+                vc.present(alert, animated: true)
+                print(error)
+            }
+        }
+    }
+    
+    private func fetchProfile(_ token: String) {
+        ProfileService.shared.fetchProfile(token) { [weak self] user in
+            guard let self else { return }
+            
+            switch user {
+            case .success(let user):
+                DispatchQueue.main.async {
+                    ProfileService.shared.networkClient.task = nil
+                    ProfileImageService.shared.fetchProfileImageURL(username: user.username) { result in
+                        switch result {
+                        case .success(let smallProfileImage):
+                            print(smallProfileImage)
+                        case .failure(let error):
+                            print("[SplashViewController] - \(error.localizedDescription)")
+                        }
+                    }
                     self.switchToTabBarController()
                 }
             case .failure(let error):
                 print(error)
             }
         }
+        
     }
 }
