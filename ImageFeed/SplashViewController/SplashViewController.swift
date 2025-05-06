@@ -10,9 +10,7 @@ import ProgressHUD
 
 final class SplashViewController: UIViewController {
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
-    
-    private let oauth2TokenStorage = OAuth2TokenStorage()
-    
+        
     private var logoImageView: UIImageView?
     
     override func viewDidLoad() {
@@ -25,7 +23,7 @@ final class SplashViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        if let token = oauth2TokenStorage.token {
+        if let token = OAuth2TokenStorage.shared.token {
             fetchProfile(token)
         } else {
             let storyboard = UIStoryboard(name: "Main", bundle: .main)
@@ -91,11 +89,11 @@ extension SplashViewController: AuthViewControllerDelegate {
     private func fetchOAuthToken(_ code: String, vc: AuthViewController) {
         UIBlockingProgressHUD.show()
         OAuth2Service.shared.fetchOAuthToken(code: code) { [weak self] result in
-            guard let self else { return }
             UIBlockingProgressHUD.dismiss()
+            guard let self else { return }
             switch result {
             case .success(let token):
-                oauth2TokenStorage.token = token
+                OAuth2TokenStorage.shared.token = token
                 DispatchQueue.main.async {
                     OAuth2Service.shared.networkClient.task = nil
                     OAuth2Service.shared.lastCode = nil

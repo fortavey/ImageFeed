@@ -12,7 +12,11 @@ enum AuthServiceError: Error {
 }
 
 struct OAuthTokenResponseBody: Decodable {
-    var access_token: String
+    let accessToken: String
+    
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+    }
 }
 
 final class OAuth2Service {
@@ -47,32 +51,25 @@ final class OAuth2Service {
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         
         assert(Thread.isMainThread)
-        if networkClient.task != nil {                                    // 5
-            if lastCode != code {                           // 6
-                networkClient.task?.cancel()                              // 7
-            } else {
-                completion(.failure(AuthServiceError.invalidRequest))
-                return                                      // 8
-            }
-        } else {
-            if lastCode == code {                           // 9
-                completion(.failure(AuthServiceError.invalidRequest))
-                return
-            }
+        if lastCode == code {
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
         }
+        networkClient.task?.cancel()
         
         lastCode = code
         
         let request = makeOAuthTokenRequest(code: code)
         
         guard let request else {
-            fatalError("Invalid OAuth token request")
+            assertionFailure("Invalid OAuth token request")
+            return
         }
         
         networkClient.objectTask(for: request) { (result: Result<OAuthTokenResponseBody, Error>) in
             switch result {
             case .success(let data):
-                completion(.success(data.access_token))
+                completion(.success(data.accessToken))
             case .failure(let error):
                 completion(.failure(error))
             }

@@ -13,9 +13,12 @@ private enum Keys {
 }
 
 final class OAuth2TokenStorage {
+    static let shared = OAuth2TokenStorage()
+    private init() {}
+    
     var token: String? {
         get {
-            return KeychainWrapper.standard.string(forKey: Keys.accessToken)
+            KeychainWrapper.standard.string(forKey: Keys.accessToken)
         }
         set {
             guard let newValue else { return }

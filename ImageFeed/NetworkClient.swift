@@ -42,24 +42,24 @@ struct NetworkClient {
     }
     
     mutating func objectTask<T: Decodable>(
-            for request: URLRequest,
-            completion: @escaping (Result<T, Error>) -> Void
-        ) {
-            self.fetch(request: request) { result in
-                switch result {
-                case .success(let data):
-                    do {
-                        let decoder = JSONDecoder()
-                        let response = try decoder.decode(T.self, from: data)
-                        completion(.success(response))
-                    } catch {
-                        print("[NetworkClient]", "Ошибка декодирования: \(error.localizedDescription), Данные: \(String(data: data, encoding: .utf8) ?? "")")
-                        completion(.failure(error))
-                    }
-                case .failure(let error):
-                    print("[NetworkClient]", "Ошибка сетевого запроса: \(error.localizedDescription)")
+        for request: URLRequest,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        fetch(request: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let decoder = JSONDecoder()
+                    let response = try decoder.decode(T.self, from: data)
+                    completion(.success(response))
+                } catch {
+                    print("[NetworkClient]", "Ошибка декодирования: \(error.localizedDescription), Данные: \(String(data: data, encoding: .utf8) ?? "")")
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                print("[NetworkClient]", "Ошибка сетевого запроса: \(error.localizedDescription)")
+                completion(.failure(error))
             }
         }
+    }
 }

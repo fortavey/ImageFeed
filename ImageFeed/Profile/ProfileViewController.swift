@@ -16,9 +16,7 @@ final class ProfileViewController: UIViewController {
     private var descriptionLabelView: UILabel = UILabel()
     
     private var profileImageServiceObserver: NSObjectProtocol?
-    
-    private var oAuth2TokenStorage = OAuth2TokenStorage()
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
@@ -68,7 +66,7 @@ final class ProfileViewController: UIViewController {
         else { return }
         let processor = RoundCornerImageProcessor(cornerRadius: 20)
         profileImageView.kf.setImage(with: url,
-                              placeholder: UIImage(named: "Photo"),
+                                     placeholder: UIImage(resource: .photo),
                               options: [.processor(processor)])
     }
     

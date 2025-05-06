@@ -18,18 +18,18 @@ struct ProfileResult: Codable {
     let bio: String?
     
     enum CodingKeys: String, CodingKey {
-        case username = "username"
+        case username
         case firstName = "first_name"
         case lastName = "last_name"
-        case bio = "bio"
+        case bio
     }
 }
 
 struct Profile: Decodable {
-    var username: String
-    var name: String
-    var loginName: String
-    var bio: String
+    let username: String
+    let name: String
+    let loginName: String
+    let bio: String
 }
 
 final class ProfileService {
@@ -70,26 +70,5 @@ final class ProfileService {
                 completion(.failure(error))
             }
         }
-        
-//        networkClient.fetch(request: request) { [weak self] result in
-//            guard let self else { return }
-//            switch result {
-//            case .success(let data):
-//                do {
-//                    let decoder = JSONDecoder()
-//                    let response = try decoder.decode(ProfileResult.self, from: data)
-//                    let user = Profile(username: response.username,
-//                                       name: "\(response.firstName) \(response.lastName ?? "")",
-//                                       loginName: "@\(response.username)",
-//                                       bio: response.bio ?? "")
-//                    self.profile = user
-//                    completion(.success(user))
-//                } catch {
-//                    completion(.failure(error))
-//                }
-//            case .failure(let error):
-//                completion(.failure(error))
-//            }
-//        }
     }
 }

@@ -5,7 +5,6 @@
 //  Created by Main on 01.05.2025.
 //
 
-import Foundation
 import UIKit
 import ProgressHUD
 
