@@ -38,4 +38,17 @@ final class ImagesListCell: UITableViewCell {
         gradientLayer.shouldRasterize = true
         gradientView.layer.insertSublayer(gradientLayer, at:0)
     }
+    
+    func setImage(with url: URL?) {
+        cellImage.kf.setImage(
+            with: url,
+            placeholder: UIImage(resource: .stub),
+            options: [.transition(.fade(0.3))]
+        )
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        cellImage.kf.cancelDownloadTask()
+    }
 }

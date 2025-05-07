@@ -11,6 +11,7 @@ final class SingleImageViewController: UIViewController {
     @IBOutlet var scrollView: UIScrollView!
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var shareButtonView: UIButton!
+    var photo: Photo?
     
     var image: UIImage? {
         didSet {
