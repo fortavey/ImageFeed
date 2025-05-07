@@ -38,6 +38,9 @@ final class ProfileService {
     var networkClient = NetworkClient()
     private(set) var profile: Profile?
     
+    func clear(){
+        profile = nil
+    }
     
     func makeProfileRequest(token: String) -> URLRequest {
         guard let url = URL(string: "https://api.unsplash.com/me") else {

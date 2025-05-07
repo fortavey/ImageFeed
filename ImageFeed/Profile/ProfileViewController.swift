@@ -100,6 +100,8 @@ final class ProfileViewController: UIViewController {
         logOutButtonView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         logOutButtonView.widthAnchor.constraint(equalToConstant: 44).isActive = true
         logOutButtonView.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        
+        logOutButtonView.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }
     
     private func renderLabelViews(currentLabelView: UILabel, topOffsetView: UIView, fontColor: UIColor, fontSize: CGFloat, fontWeight: UIFont.Weight = .regular){
@@ -111,5 +113,9 @@ final class ProfileViewController: UIViewController {
         
         currentLabelView.topAnchor.constraint(equalTo: topOffsetView.bottomAnchor, constant: 8).isActive = true
         currentLabelView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
+    }
+    
+    @objc private func didTapLogoutButton() {
+        ProfileLogoutService.shared.logout()
     }
 }

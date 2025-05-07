@@ -133,6 +133,14 @@ extension SplashViewController: AuthViewControllerDelegate {
                 }
             case .failure(let error):
                 print(error)
+                let alert = UIAlertController(title: "Что-то пошло не так",
+                                              message: error.localizedDescription,
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ок", style: .default))
+                
+                DispatchQueue.main.async {
+                    self.present(alert, animated: true)
+                }
             }
         }
         

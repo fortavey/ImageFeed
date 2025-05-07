@@ -6,31 +6,32 @@
 //
 
 import UIKit
+import ProgressHUD
 
 final class SingleImageViewController: UIViewController {
     @IBOutlet var scrollView: UIScrollView!
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var shareButtonView: UIButton!
-    var photo: Photo?
     
-    var image: UIImage? {
-        didSet {
-            guard isViewLoaded, let image else { return }
-
-            imageView.image = image
-            imageView.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
+    var photo: Photo?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        UIBlockingProgressHUD.show()
         self.shareButtonView.setTitle("", for: .normal)
         
-        if let image {
-            self.imageView.image = image
-            self.imageView.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
+        if let photo {
+            let photoImageURL = photo.largeImageURL
+            guard let url = URL(string: photoImageURL) else { return }
+            imageView.kf.setImage(
+                with: url,
+//                placeholder: UIImage(resource: .stub),
+                options: [.transition(.fade(0.3))]
+            ) {_ in 
+                UIBlockingProgressHUD.dismiss()
+            }
+            imageView.frame.size = photo.size
+            rescaleAndCenterImageInScrollView(photo: photo)
         }
        
         scrollView.minimumZoomScale = 0.1
@@ -38,12 +39,12 @@ final class SingleImageViewController: UIViewController {
         
     }
     
-    private func rescaleAndCenterImageInScrollView(image: UIImage) {
+    private func rescaleAndCenterImageInScrollView(photo: Photo) {
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
         view.layoutIfNeeded()
         let visibleRectSize = scrollView.bounds.size
-        let imageSize = image.size
+        let imageSize = photo.size
         let hScale = visibleRectSize.width / imageSize.width
         let vScale = visibleRectSize.height / imageSize.height
         let scale = min(maxZoomScale, max(minZoomScale, min(hScale, vScale)))
@@ -61,9 +62,9 @@ final class SingleImageViewController: UIViewController {
     }
     
     @IBAction func didTapShareButton(_ sender: Any) {
-        guard let image else { return }
+        guard let photo else { return }
         let share = UIActivityViewController(
-            activityItems: [image],
+            activityItems: [photo],
             applicationActivities: nil
         )
         present(share, animated: true, completion: nil)

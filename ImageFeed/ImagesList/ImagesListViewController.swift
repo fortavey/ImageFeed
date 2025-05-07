@@ -17,7 +17,7 @@ final class ImagesListViewController: UIViewController {
 
     @IBOutlet private var tableView: UITableView!
     
-    private lazy var dateFormatter: DateFormatter = {
+    lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
         formatter.timeStyle = .none
@@ -38,16 +38,17 @@ final class ImagesListViewController: UIViewController {
         ) { [weak self] notification in
             guard let self = self else { return }
             if let updatedPhotos = notification.userInfo?["photos"] as? [Photo] {
-                print("Before update: \(self.photos.count)")
                 self.photos = updatedPhotos
-                print("After update: \(self.photos.count)")
-                print(self.photos)
                 self.updateTableViewAnimated()
             }
         }
         
         print("Вызов стартового запроса")
         ImagesListService.shared.fetchPhotosNextPage()
+    }
+    
+    func updateLike(){
+        
     }
     
     func updateTableViewAnimated() {
@@ -80,20 +81,16 @@ final class ImagesListViewController: UIViewController {
             
             let photo = photos[indexPath.row]
             viewController.photo = photo
-//            viewController.imageURL = URL(string: photo.largeImageURL)
         } else {
             super.prepare(for: segue, sender: sender)
         }
     }
     
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        cell.dateLabel.text = dateFormatter.string(from: Date())
-        cell.likeButton.tintColor = indexPath.row % 2 == 0 ? .systemRed : .systemGray
-        
+        cell.vc = self
         let photo = photos[indexPath.row]
-        let photoImageURL = photo.thumbImageURL
-        guard let url = URL(string: photoImageURL) else { return }
-        cell.setImage(with: url)
+        cell.photo = photo
+        cell.configCell()
     }
 }
 
