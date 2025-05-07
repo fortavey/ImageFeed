@@ -101,7 +101,7 @@ final class ProfileViewController: UIViewController {
         logOutButtonView.widthAnchor.constraint(equalToConstant: 44).isActive = true
         logOutButtonView.heightAnchor.constraint(equalToConstant: 44).isActive = true
         
-        logOutButtonView.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+        logOutButtonView.addTarget(self, action: #selector(clickLogoutButton), for: .touchUpInside)
     }
     
     private func renderLabelViews(currentLabelView: UILabel, topOffsetView: UIView, fontColor: UIColor, fontSize: CGFloat, fontWeight: UIFont.Weight = .regular){
@@ -115,7 +115,22 @@ final class ProfileViewController: UIViewController {
         currentLabelView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
     }
     
-    @objc private func didTapLogoutButton() {
-        ProfileLogoutService.shared.logout()
+    @objc private func clickLogoutButton() {
+        showLogoutAlert()
+    }
+    
+    private func showLogoutAlert() {
+        let alert = UIAlertController(title: "Пока, пока!", message: "Вы уверены, что хотите выйти?", preferredStyle: .alert)
+        
+        let logoutAction = UIAlertAction(title: "Да", style: .destructive) { _ in
+            ProfileLogoutService.shared.logout()
+        }
+        
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+        
+        alert.addAction(logoutAction)
+        alert.addAction(cancelAction)
+        
+        self.present(alert, animated: true)
     }
 }
