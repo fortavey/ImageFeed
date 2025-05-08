@@ -47,10 +47,6 @@ final class ImagesListViewController: UIViewController {
         ImagesListService.shared.fetchPhotosNextPage()
     }
     
-    func updateLike(){
-        
-    }
-    
     func updateTableViewAnimated() {
         let oldCount = tableView.numberOfRows(inSection: 0)
         let newCount = photos.count
@@ -87,10 +83,16 @@ final class ImagesListViewController: UIViewController {
     }
     
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        cell.vc = self
+        cell.delegate = self
         let photo = photos[indexPath.row]
         cell.photo = photo
         cell.configCell()
+    }
+    
+    func updatePhotosAfterLike(likedPhoto: Photo) {
+        if let index = self.photos.firstIndex(where: { $0.id == likedPhoto.id }) {
+            self.photos[index] = likedPhoto
+        }
     }
 }
 
@@ -136,6 +138,37 @@ extension ImagesListViewController: UITableViewDelegate {
     ) {
         if indexPath.row == photos.count - 1 {
             ImagesListService.shared.fetchPhotosNextPage()
+        }
+    }
+}
+
+extension ImagesListViewController: ImagesListCellDelegate {
+    func getDateFormated(createdAt: Date) -> String {
+        dateFormatter.string(from: createdAt)
+    }
+    
+    
+    func imageListCellClickLike(_ cell: ImagesListCell) {
+        UIBlockingProgressHUD.show()
+        guard let photo = cell.photo else { return }
+        ImagesListService.shared.changeLike(photoId: photo.id, isLike: photo.isLiked) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let photo):
+                DispatchQueue.main.async {
+                    cell.photo = photo
+                    cell.setIsLikedUI()
+                    self.updatePhotosAfterLike(likedPhoto: photo)
+                    UIBlockingProgressHUD.dismiss()
+                    cell.setIsLikedUI()
+                }
+            case .failure(let error):
+                print("[ImagesListCell]", "Ошибка сетевого запроса", error)
+                DispatchQueue.main.async {
+                    UIBlockingProgressHUD.dismiss()
+                }
+            }
+            
         }
     }
 }

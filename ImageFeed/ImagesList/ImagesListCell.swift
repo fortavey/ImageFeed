@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellClickLike(_ cell: ImagesListCell)
+    func getDateFormated(createdAt: Date) -> String
+}
+
 final class ImagesListCell: UITableViewCell {
     @IBOutlet var likeButton: UIButton!
     @IBOutlet var cellImage: UIImageView!
@@ -14,7 +19,7 @@ final class ImagesListCell: UITableViewCell {
     @IBOutlet var gradientView: UIView!
     
     var photo: Photo?
-    var vc: ImagesListViewController?
+    weak var delegate: ImagesListCellDelegate?
     
     static let reuseIdentifier = "ImagesListCell"
     private let gradientLayer = CAGradientLayer()
@@ -37,15 +42,15 @@ final class ImagesListCell: UITableViewCell {
     
     func configCell(){
         guard let photo else { return }
-        print(photo)
+        setIsLikedUI()
         let photoImageURL = photo.thumbImageURL
-        guard let url = URL(string: photoImageURL) else { return }
-        setImage(with: url)
-        likeButton.tintColor = photo.isLiked ? .systemRed : .systemGray
-        guard let createdAt = photo.createdAt else { return }
-        if let vc {
-            dateLabel.text = vc.dateFormatter.string(from: createdAt)
+        if let url = URL(string: photoImageURL) {
+            setImage(with: url)
         }
+        if let createdAt = photo.createdAt {
+            dateLabel.text = delegate?.getDateFormated(createdAt: createdAt)
+        }
+        
     }
     
     private func addGradient(){
@@ -65,7 +70,7 @@ final class ImagesListCell: UITableViewCell {
         )
     }
     
-    func setIsLiked() {
+    func setIsLikedUI() {
         guard let photo else { return }
         likeButton.tintColor = photo.isLiked ? .systemRed : .systemGray
     }
@@ -74,31 +79,12 @@ final class ImagesListCell: UITableViewCell {
         guard let photo else { return }
         if let index = ImagesListService.shared.photos.firstIndex(where: { $0.id == photo.id }) {
             let photo = ImagesListService.shared.photos[index]
-            
             self.photo = photo
         }
     }
     
     @IBAction func clickLike(_ sender: Any) {
-        UIBlockingProgressHUD.show()
-        guard let photo else { return }
-        ImagesListService.shared.changeLike(photoId: photo.id, isLike: photo.isLiked) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let photo):
-                DispatchQueue.main.async {
-                    self.photo = photo
-                    UIBlockingProgressHUD.dismiss()
-                    self.setIsLiked()
-                }
-            case .failure(let error):
-                print("[ImagesListCell]", "Ошибка сетевого запроса", error)
-                DispatchQueue.main.async {
-                    UIBlockingProgressHUD.dismiss()
-                }
-            }
-            
-        }
+        delegate?.imageListCellClickLike(self)
     }
     override func prepareForReuse() {
         super.prepareForReuse()

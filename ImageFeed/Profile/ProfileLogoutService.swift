@@ -8,25 +8,23 @@
 import Foundation
 import WebKit
 
+protocol ProfileLogoutServiceDelegate: AnyObject {
+    func navigateAfterLogout()
+}
+
 final class ProfileLogoutService {
     static let shared = ProfileLogoutService()
     
     private init() { }
-    
-    func logout() {
+        
+    func logout(delegate: ProfileLogoutServiceDelegate) {
         OAuth2TokenStorage.shared.token = nil
         ProfileService.shared.clear()
         ProfileImageService.shared.clear()
         ImagesListService.shared.clear()
         cleanCookies()
-        
-        print(OAuth2TokenStorage.shared.token)
-        
-        DispatchQueue.main.async {
-            guard let window = UIApplication.shared.windows.first else { return }
-            window.rootViewController = SplashViewController()
-            window.makeKeyAndVisible()
-        }
+                
+        delegate.navigateAfterLogout()
     }
     
     private func cleanCookies() {

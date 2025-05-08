@@ -79,10 +79,8 @@ final class ProfileViewController: UIViewController {
     private func renderProfileImage() {
         let image = UIImage(named: "Photo") ?? UIImage(systemName: "person.crop.circle.fill")
         profileImageView.image = image
-                
         view.addSubview(profileImageView)
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        
         profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32).isActive = true
         profileImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
         profileImageView.widthAnchor.constraint(equalToConstant: 70).isActive = true
@@ -92,15 +90,12 @@ final class ProfileViewController: UIViewController {
     private func renderLogOutButtonView(){
         logOutButtonView.setImage(UIImage(systemName: "ipad.and.arrow.forward"), for: .normal)
         logOutButtonView.tintColor = .ypRed
-        
         view.addSubview(logOutButtonView)
         logOutButtonView.translatesAutoresizingMaskIntoConstraints = false
-        
         logOutButtonView.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
         logOutButtonView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         logOutButtonView.widthAnchor.constraint(equalToConstant: 44).isActive = true
         logOutButtonView.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        
         logOutButtonView.addTarget(self, action: #selector(clickLogoutButton), for: .touchUpInside)
     }
     
@@ -108,9 +103,7 @@ final class ProfileViewController: UIViewController {
         currentLabelView.font = UIFont.systemFont(ofSize: fontSize, weight: fontWeight)
         currentLabelView.textColor = fontColor
         view.addSubview(currentLabelView)
-        
         currentLabelView.translatesAutoresizingMaskIntoConstraints = false
-        
         currentLabelView.topAnchor.constraint(equalTo: topOffsetView.bottomAnchor, constant: 8).isActive = true
         currentLabelView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
     }
@@ -121,16 +114,23 @@ final class ProfileViewController: UIViewController {
     
     private func showLogoutAlert() {
         let alert = UIAlertController(title: "Пока, пока!", message: "Вы уверены, что хотите выйти?", preferredStyle: .alert)
-        
         let logoutAction = UIAlertAction(title: "Да", style: .destructive) { _ in
-            ProfileLogoutService.shared.logout()
+            ProfileLogoutService.shared.logout(delegate: self)
         }
-        
         let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
-        
         alert.addAction(logoutAction)
         alert.addAction(cancelAction)
         
         self.present(alert, animated: true)
+    }
+}
+
+extension ProfileViewController: ProfileLogoutServiceDelegate {
+    func navigateAfterLogout() {
+        DispatchQueue.main.async {
+            guard let window = UIApplication.shared.windows.first else { return }
+            window.rootViewController = SplashViewController()
+            window.makeKeyAndVisible()
+        }
     }
 }

@@ -7,63 +7,11 @@
 
 import Foundation
 
-struct LikeResponse: Decodable {
-    let photo: LikePhoto
-}
-
-struct LikePhoto: Decodable {
-    let id: String
-    let likedByUser: Bool
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case likedByUser = "liked_by_user"
-    }
-}
-
-struct Photo {
-    let id: String
-    let size: CGSize
-    let createdAt: Date?
-    let welcomeDescription: String?
-    let thumbImageURL: String
-    let largeImageURL: String
-    let isLiked: Bool
-}
-
-struct PhotoResult: Decodable {
-    let id: String
-    let width: Double
-    let height: Double
-    let createdAt: String?
-    let description: String?
-    let urls: UrlsResult
-    let likedByUser: Bool
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case width
-        case height
-        case createdAt = "created_at"
-        case description
-        case urls
-        case likedByUser = "liked_by_user"
-    }
-}
-
-struct UrlsResult: Codable {
-    let raw: String
-    let full: String
-    let regular: String
-    let small: String
-    let thumb: String
-}
-
 final class ImagesListService {
     static let shared = ImagesListService()
     private init(){}
     
-    lazy var dateFormatter = ISO8601DateFormatter()
+    private lazy var dateFormatter = ISO8601DateFormatter()
     
     private var networkClient = NetworkClient()
     
@@ -106,7 +54,7 @@ final class ImagesListService {
     
     func makePhotosNextPageRequest(token: String, nextPage: Int) -> URLRequest? {
         
-        guard var urlComponents = URLComponents(string: "https://api.unsplash.com/photos") else {
+        guard var urlComponents = URLComponents(string: "\(Constants.defaultBaseURL)/photos") else {
             fatalError("Invalid PhotosNextPage URL")
         }
         urlComponents.queryItems = [
@@ -176,7 +124,7 @@ final class ImagesListService {
     
     func makeLikeRequest(token: String, photoId: String, isLike: Bool) -> URLRequest? {
         
-        guard var urlComponents = URLComponents(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
+        guard var urlComponents = URLComponents(string: "\(Constants.defaultBaseURL)/photos/\(photoId)/like") else {
             fatalError("Invalid Photo like URL")
         }
         urlComponents.queryItems = []
