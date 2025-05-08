@@ -23,6 +23,10 @@ final class ProfileImageService {
     private(set) var avatarURL: String?
     var networkClient = NetworkClient()
     
+    func clear(){
+        avatarURL = nil
+    }
+    
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         if networkClient.task != nil {
