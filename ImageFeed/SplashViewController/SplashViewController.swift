@@ -124,7 +124,7 @@ extension SplashViewController: AuthViewControllerDelegate {
                     ProfileImageService.shared.fetchProfileImageURL(username: user.username) { result in
                         switch result {
                         case .success(let smallProfileImage):
-                            print(smallProfileImage)
+                            ProfileImageService.shared.setAvatar(str: smallProfileImage)
                         case .failure(let error):
                             print("[SplashViewController] - \(error.localizedDescription)")
                         }

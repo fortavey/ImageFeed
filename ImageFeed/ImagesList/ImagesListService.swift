@@ -7,6 +7,10 @@
 
 import Foundation
 
+public protocol ImagesListServiceProtocol: AnyObject {
+    var photos: [Photo] { get }
+}
+
 final class ImagesListService {
     static let shared = ImagesListService()
     private init(){}
@@ -15,7 +19,7 @@ final class ImagesListService {
     
     private var networkClient = NetworkClient()
     
-    private(set) var photos: [Photo] = []
+    var photos: [Photo] = []
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
     private var currentPage: Int = 0

@@ -8,29 +8,31 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+public protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+    func updateProfileDetails(profile: Profile)
+    func configure(_ presenter: ProfilePresenterProtocol)
+    func updateAvatar(url: URL)
+}
+
+final class ProfileViewController: UIViewController & ProfileViewControllerProtocol {
+    var presenter: ProfilePresenterProtocol?
+    
     private var profileImageView: UIImageView = UIImageView()
     private var logOutButtonView: UIButton = UIButton()
     private var fioLabelView: UILabel = UILabel()
     private var nicknameLabelView: UILabel = UILabel()
     private var descriptionLabelView: UILabel = UILabel()
-    
-    private var profileImageServiceObserver: NSObjectProtocol?
         
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
+        logOutButtonView.accessibilityIdentifier = "logoutButton"
         
-        profileImageServiceObserver = NotificationCenter.default
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()
-            }
-        updateAvatar()
+        if let presenter {
+            presenter.viewDidLoad()
+            presenter.updateProfileDetails()
+        }
        
         if let profile = ProfileService.shared.profile {
             updateProfileDetails(profile: profile)
@@ -59,26 +61,24 @@ final class ProfileViewController: UIViewController {
         )
     }
     
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
-        let processor = RoundCornerImageProcessor(cornerRadius: 20)
-        profileImageView.kf.setImage(with: url,
-                                     placeholder: UIImage(resource: .photo),
-                              options: [.processor(processor)])
+    func configure(_ presenter: ProfilePresenterProtocol) {
+        self.presenter = presenter
+        guard var selfPresenter = self.presenter else { return }
+        selfPresenter.view = self
     }
     
-    private func updateProfileDetails(profile: Profile) {
+    func updateAvatar(url: URL) {
+        let processor = RoundCornerImageProcessor(cornerRadius: 35, targetSize: CGSize(width: 70, height: 70), backgroundColor: .clear)
+        profileImageView.kf.setImage(with: url, placeholder: UIImage(resource: .photo), options: [.processor(processor)])
+    }
+    
+    func updateProfileDetails(profile: Profile) {
         self.fioLabelView.text = profile.name
         self.nicknameLabelView.text = profile.loginName
         self.descriptionLabelView.text = profile.bio
     }
 
     private func renderProfileImage() {
-        let image = UIImage(named: "Photo") ?? UIImage(systemName: "person.crop.circle.fill")
-        profileImageView.image = image
         view.addSubview(profileImageView)
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32).isActive = true
@@ -114,8 +114,9 @@ final class ProfileViewController: UIViewController {
     
     private func showLogoutAlert() {
         let alert = UIAlertController(title: "Пока, пока!", message: "Вы уверены, что хотите выйти?", preferredStyle: .alert)
-        let logoutAction = UIAlertAction(title: "Да", style: .destructive) { _ in
-            ProfileLogoutService.shared.logout(delegate: self)
+        let logoutAction = UIAlertAction(title: "Да", style: .destructive) { [weak self] _ in
+            guard let self, let presenter = self.presenter else { return }
+            presenter.logout()
         }
         let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
         alert.addAction(logoutAction)

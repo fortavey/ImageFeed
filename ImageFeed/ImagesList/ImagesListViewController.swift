@@ -9,20 +9,22 @@ import UIKit
 import Kingfisher
 import ProgressHUD
 
-final class ImagesListViewController: UIViewController {
+public protocol ImageListViewControllerProtocol: AnyObject {
+    var presenter: ImageListPresenterProtocol? { get set }
+    var photos: [Photo] { get set }
+    func updateLikeUISuccess(cell: ImagesListCell, photo: Photo)
+    func updateLikeUIFailure()
+    func updateTableViewAnimated()
+}
+
+final class ImagesListViewController: UIViewController & ImageListViewControllerProtocol {
+    var presenter: ImageListPresenterProtocol?
+    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private var photos: [Photo] = []
-    private var imageListObserver: NSObjectProtocol?
+    var photos: [Photo] = []
     private var isLoad: Bool = true
 
     @IBOutlet private var tableView: UITableView!
-    
-    lazy var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .none
-        return formatter
-    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,20 +33,14 @@ final class ImagesListViewController: UIViewController {
         }
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         
-        imageListObserver = NotificationCenter.default.addObserver(
-            forName: ImagesListService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self = self else { return }
-            if let updatedPhotos = notification.userInfo?["photos"] as? [Photo] {
-                self.photos = updatedPhotos
-                self.updateTableViewAnimated()
-            }
+        if let presenter {
+            presenter.viewDidLoad()
         }
-        
-        print("Вызов стартового запроса")
-        ImagesListService.shared.fetchPhotosNextPage()
+    }
+    
+    func configure(_ presenter: ImageListPresenterProtocol) {
+        self.presenter = presenter
+        presenter.view = self
     }
     
     func updateTableViewAnimated() {
@@ -136,39 +132,37 @@ extension ImagesListViewController: UITableViewDelegate {
       willDisplay cell: UITableViewCell,
       forRowAt indexPath: IndexPath
     ) {
-        if indexPath.row == photos.count - 1 {
-            ImagesListService.shared.fetchPhotosNextPage()
+        if indexPath.row == photos.count - 1, let presenter {
+            presenter.fetchPhotosNextPage()
         }
     }
 }
 
 extension ImagesListViewController: ImagesListCellDelegate {
     func getDateFormated(createdAt: Date) -> String {
-        dateFormatter.string(from: createdAt)
+        guard let presenter else { return "" }
+        return presenter.dateFormatter.string(from: createdAt)
+    }
+    
+    func updateLikeUISuccess(cell: ImagesListCell, photo: Photo){
+        DispatchQueue.main.async {
+            cell.photo = photo
+            cell.setIsLikedUI()
+            self.updatePhotosAfterLike(likedPhoto: photo)
+            UIBlockingProgressHUD.dismiss()
+            cell.setIsLikedUI()
+        }
+    }
+    
+    func updateLikeUIFailure(){
+        DispatchQueue.main.async {
+            UIBlockingProgressHUD.dismiss()
+        }
     }
     
     
     func imageListCellClickLike(_ cell: ImagesListCell) {
         UIBlockingProgressHUD.show()
-        guard let photo = cell.photo else { return }
-        ImagesListService.shared.changeLike(photoId: photo.id, isLike: photo.isLiked) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let photo):
-                DispatchQueue.main.async {
-                    cell.photo = photo
-                    cell.setIsLikedUI()
-                    self.updatePhotosAfterLike(likedPhoto: photo)
-                    UIBlockingProgressHUD.dismiss()
-                    cell.setIsLikedUI()
-                }
-            case .failure(let error):
-                print("[ImagesListCell]", "Ошибка сетевого запроса", error)
-                DispatchQueue.main.async {
-                    UIBlockingProgressHUD.dismiss()
-                }
-            }
-            
-        }
+        presenter?.imageListCellClickLike(cell)
     }
 }
