@@ -23,6 +23,10 @@ final class ProfileImageService {
     private(set) var avatarURL: String?
     var networkClient = NetworkClient()
     
+    func setAvatar(str: String){
+        avatarURL = str
+    }
+    
     func clear(){
         avatarURL = nil
     }
@@ -54,7 +58,7 @@ final class ProfileImageService {
     }
     
     func makeProfileImagRequest(username: String) -> URLRequest? {
-        guard let url = URL(string: "https://api.unsplash.com//users/\(username)") else {
+        guard let url = URL(string: "https://api.unsplash.com/users/\(username)") else {
             fatalError("Invalid profile URL")
         }
         

@@ -60,6 +60,7 @@
                                                         </view>
                                                         <button opaque="NO" alpha="0.5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="m9s-xb-mkW">
                                                             <rect key="frame" x="317" y="0.0" width="44" height="44"/>
+                                                            <accessibility key="accessibilityConfiguration" identifier="likeButton"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="height" constant="44" id="WhK-sm-jfM"/>
                                                                 <constraint firstAttribute="width" constant="44" id="xpp-0C-lZa"/>
@@ -154,6 +155,7 @@
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aBx-y0-60r">
                                 <rect key="frame" x="0.0" y="0.0" width="48" height="48"/>
+                                <accessibility key="accessibilityConfiguration" identifier="dismissButton"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="1fe-k6-bGM"/>
                                     <constraint firstAttribute="width" constant="48" id="6ET-iP-SRX"/>
@@ -222,6 +224,7 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="53U-qR-8dh">
                                 <rect key="frame" x="16" y="680" width="361" height="48"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <accessibility key="accessibilityConfiguration" identifier="Authenticate"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="vRY-aR-CaQ"/>
                                 </constraints>
@@ -257,7 +260,7 @@
         <!--Web View View Controller-->
         <scene sceneID="VEa-KI-IjN">
             <objects>
-                <viewController id="ktO-ua-dVa" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" id="ktO-ua-dVa" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="w4S-LC-PoR">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

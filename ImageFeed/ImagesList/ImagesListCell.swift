@@ -12,7 +12,7 @@ protocol ImagesListCellDelegate: AnyObject {
     func getDateFormated(createdAt: Date) -> String
 }
 
-final class ImagesListCell: UITableViewCell {
+public final class ImagesListCell: UITableViewCell {
     @IBOutlet var likeButton: UIButton!
     @IBOutlet var cellImage: UIImageView!
     @IBOutlet var dateLabel: UILabel!
@@ -26,13 +26,13 @@ final class ImagesListCell: UITableViewCell {
     
     
     
-    override func awakeFromNib() {
+    public override func awakeFromNib() {
         super.awakeFromNib()
         likeButton.setTitle("", for: .normal) // У кнопки непонятно откуда появляется дефолтный текст
         addGradient()
     }
     
-    override func layoutSubviews() {
+    public override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = CGRect(x: 0,
                                      y: 0,
@@ -86,7 +86,7 @@ final class ImagesListCell: UITableViewCell {
     @IBAction func clickLike(_ sender: Any) {
         delegate?.imageListCellClickLike(self)
     }
-    override func prepareForReuse() {
+    public override func prepareForReuse() {
         super.prepareForReuse()
         cellImage.kf.cancelDownloadTask()
     }

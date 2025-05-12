@@ -8,15 +8,14 @@
 import Foundation
 import WebKit
 
-protocol ProfileLogoutServiceDelegate: AnyObject {
+public protocol ProfileLogoutServiceDelegate: AnyObject {
     func navigateAfterLogout()
 }
+public protocol ProfileLogoutServiceProtocol {
+    func logout(delegate: ProfileLogoutServiceDelegate)
+}
 
-final class ProfileLogoutService {
-    static let shared = ProfileLogoutService()
-    
-    private init() { }
-        
+final class ProfileLogoutService: ProfileLogoutServiceProtocol {
     func logout(delegate: ProfileLogoutServiceDelegate) {
         OAuth2TokenStorage.shared.token = nil
         ProfileService.shared.clear()
